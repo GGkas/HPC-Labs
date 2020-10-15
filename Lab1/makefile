@@ -24,6 +24,9 @@ all: $(EXECUTABLES)
 
 # make clean will remove all executables, jpg files and the 
 # output of previous executions.
+
+.PHONY: clean
+
 clean:
 	rm -f $(EXECUTABLES) *.jpg output_sobel.grey
 

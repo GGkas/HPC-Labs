@@ -1,9 +1,17 @@
 #!/bin/bash
 
 touch log_file.txt
-sh -c "make all" &
+LOGFILE="log_file.txt"
 
-for i in {1...12}
+sh -c "make all"
+
+echo -n "Progress: "
+
+
+for i in {1..12}
 do
-	./$1 >> log_file.txt
+	printf '#'
+	./$1 &>> $LOGFILE
 done
+printf '\n'
+sh -c "make clean"
