@@ -1,0 +1,12 @@
+    1.58128 seconds
+    1.57664 seconds
+    1.59031 seconds
+    1.59029 seconds
+    1.67848 seconds
+    1.60902 seconds
+    1.57739 seconds
+    1.57035 seconds
+    1.59142 seconds
+    1.57865 seconds
+    1.56915 seconds
+    1.57053 seconds
