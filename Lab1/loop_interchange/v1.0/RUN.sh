@@ -23,9 +23,9 @@ if [ $2 -eq 0 ] ; then
 	awk -F':' '{print $2}' ${TEMPFILE} > psnr.txt
 else
 	grep "Total time =" ${LOGFILE} > ${TEMPFILE}
-	awk -F'=' '{print $2}' ${TEMPFILE} > times.$2.txt
-    grep "PSNR" ${LOGFILE} > ${TEMPFILE}
-	awk -F':' '{print $2}' ${TEMPFILE} > psnr.$2.txt
+	awk -F'=' '{print $2}' ${TEMPFILE} > times.fast.txt
+    	grep "PSNR" ${LOGFILE} > ${TEMPFILE}
+	awk -F':' '{print $2}' ${TEMPFILE} > psnr.fast.txt
 fi
 
 rm -f ${LOGFILE} ${TEMPFILE}

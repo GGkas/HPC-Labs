@@ -21,8 +21,8 @@ const char vert_operator[3][3] = {{1, 2, 1},
                             {0, 0, 0}, 
                             {-1, -2, -1}};
 
-double sobel(unsigned char *input, unsigned char *output, unsigned char *golden);
-int convolution2D(int posy, int posx, const unsigned char *input, char operator[][3]);
+double sobel(unsigned char *restrict input, unsigned char *restrict output, unsigned char *restrict golden);
+int convolution2D(int posy, int posx, const unsigned char *input, const char operator[][3]);
 
 /* The arrays holding the input image, the output image and the output used *
  * as golden standard. The luminosity (intensity) of each pixel in the      *
@@ -38,7 +38,7 @@ unsigned char input[SIZE*SIZE], output[SIZE*SIZE], golden[SIZE*SIZE];
  * operator the operator we apply (horizontal or vertical). The function ret. *
  * value is the convolution of the operator with the neighboring pixels of the*
  * pixel we process.														  */
-int convolution2D(int posy, int posx, const unsigned char *input, char operator[][3]) {
+int convolution2D(int posy, int posx, const unsigned char *input, const char operator[][3]) {
 	int i, j, res;
   
 	res = 0;
@@ -59,7 +59,7 @@ double sobel(unsigned char *input, unsigned char *output, unsigned char *golden)
 {
 	double PSNR = 0, t;
     double conv_horiz,conv_vert;
-    int array_index;
+    register int array_index;
     register int i,j,k;
 	unsigned int p;
 	int res;
