@@ -8,9 +8,9 @@
 #include <errno.h>
 
 #define SIZE	4096
-#define INPUT_FILE	"input.grey"
-#define OUTPUT_FILE	"output_sobel.grey"
-#define GOLDEN_FILE	"golden.grey"
+#define INPUT_FILE	"../Data/input.grey"
+#define OUTPUT_FILE	"../Data/output_sobel.grey"
+#define GOLDEN_FILE	"../Data/golden.grey"
 
 /* The horizontal and vertical operators to be used in the sobel filter */
 char horiz_operator[3][3] = {{-1, 0, 1}, 

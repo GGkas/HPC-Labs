@@ -2,7 +2,8 @@
 # ARE NOT EQUIVALENT to tabs. The line after a rule starts with a tab!
 
 #Add any executable you want to be created here.
-EXECUTABLES	= sobel_orig
+EXECUTABLES	= sobel_orig.loop_inter.loop_unrolling_bad \
+		  sobel_orig.loop_inter.loop_unrolling_good
 
 #This is the compiler to use
 CC = icc
