@@ -17,10 +17,11 @@
 all: seq 
 
 
-CC             = gcc
+CC             = icc
 
 INCFLAGS    = -I.
-OPTFLAGS    = -O4 -DNDEBUG
+DEFFLAGS	= -DSEQ # DSEQ for sequential, DPAR for parallel
+OPTFLAGS    = -g -O3 -DNDEBUG -qopenmp $(DEFFLAGS)
 LDFLAGS     = $(OPTFLAGS)
 
 

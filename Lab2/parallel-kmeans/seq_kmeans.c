@@ -21,6 +21,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef PAR
+#include <omp.h>
+#endif
 
 #include "kmeans.h"
 
@@ -51,6 +54,9 @@ int find_nearest_cluster(int     numClusters, /* no. clusters */
     int   index, i;
     float dist, min_dist;
 
+    #ifdef PARDEBUG
+    fprintf(stderr, "This is threadID : %d\n", omp_get_thread_num());
+    #endif
     /* find the cluster id that has min distance to object */
     index    = 0;
     min_dist = euclid_dist_2(numCoords, object, clusters[0]);
@@ -99,19 +105,31 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
 
     do {
         delta = 0.0;
+        #ifdef PAR
+        #pragma omp parallel for private(index, j) /* might need to add more, like firstprivate to delta */
+        #endif
         for (i=0; i<numObjs; i++) {
             /* find the array index of nestest cluster center */
             index = find_nearest_cluster(numClusters, numCoords, objects[i],
                                          clusters);
 
             /* if membership changes, increase delta by 1 */
-            if (membership[i] != index) delta += 1.0;
+            if (membership[i] != index)
+                #ifdef PAR
+                #pragma omp atomic
+                #endif
+                delta += 1.0;
 
             /* assign the membership to object i */
             membership[i] = index;
 
             /* update new cluster center : sum of objects located within */
+            #ifdef PAR
+            #pragma omp critical
+            #endif
+            {
             newClusterSize[index]++;
+            }
             for (j=0; j<numCoords; j++)
                 newClusters[index][j] += objects[i][j];
         }
