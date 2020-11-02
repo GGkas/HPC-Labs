@@ -20,7 +20,7 @@ all: seq
 CC             = icc
 
 INCFLAGS    = -I.
-DEFFLAGS	= -DSEQ # DSEQ for sequential, DPAR for parallel
+DEFFLAGS	= -DPAR # DSEQ for sequential, DPAR for parallel
 OPTFLAGS    = -g -O3 -DNDEBUG -qopenmp $(DEFFLAGS)
 LDFLAGS     = $(OPTFLAGS)
 

@@ -54,7 +54,7 @@ int find_nearest_cluster(int     numClusters, /* no. clusters */
     int   index, i;
     float dist, min_dist;
 
-    #ifdef PARDEBUG
+    #ifdef PARDEB
     fprintf(stderr, "This is threadID : %d\n", omp_get_thread_num());
     #endif
     /* find the cluster id that has min distance to object */
@@ -106,7 +106,11 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
     do {
         delta = 0.0;
         #ifdef PAR
-        #pragma omp parallel for private(index, j) /* might need to add more, like firstprivate to delta */
+        #pragma omp parallel
+        #endif
+        {
+        #ifdef PAR
+        #pragma omp for private(index, j), schedule(static)
         #endif
         for (i=0; i<numObjs; i++) {
             /* find the array index of nestest cluster center */
@@ -125,15 +129,17 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
 
             /* update new cluster center : sum of objects located within */
             #ifdef PAR
-            #pragma omp critical
+            #pragma omp atomic /* Μπορεί ούτε αυτό να χρειάζεται, γενικά τσέκαρε αν τα atomic χρειάζονται για να 
+            βγουν σωστά αποτελέσματα, αλλιώς τα βγάζουμε τελείως γιατί μου γκρινιάζει το vtune */
             #endif
-            {
             newClusterSize[index]++;
-            }
+
             for (j=0; j<numCoords; j++)
                 newClusters[index][j] += objects[i][j];
         }
-
+        #ifdef PAR
+        #pragma omp for private(j), schedule(static)
+        #endif
         /* average the sum and replace old cluster center with newClusters */
         for (i=0; i<numClusters; i++) {
             for (j=0; j<numCoords; j++) {
@@ -143,8 +149,11 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
             }
             newClusterSize[i] = 0;   /* set back to 0 */
         }
-            
+        #ifdef PAR
+        #pragma omp atomic  /* Δοκίμασε και χωρίς αυτό, να συγκρίνεις τα output αρχεία */
+        #endif
         delta /= numObjs;
+        }
     } while (delta > threshold && loop++ < 500);
 
     free(newClusters[0]);
