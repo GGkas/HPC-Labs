@@ -190,8 +190,12 @@ int main(int argc, char **argv) {
     /*---- output performance numbers ---------------------------------------*/
     if (is_output_timing) {
         io_timing += wtime() - timing;
+#ifdef PAR
+	printf("\nPerforming **** Optimized Kmeans (parallel version) ****\n");
+#endif
+#ifdef SEQ
         printf("\nPerforming **** Regular Kmeans (sequential version) ****\n");
-
+#endif
         printf("Input file:     %s\n", filename);
         printf("numObjs       = %d\n", numObjs);
         printf("numCoords     = %d\n", numCoords);

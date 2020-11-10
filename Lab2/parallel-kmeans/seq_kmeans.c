@@ -37,7 +37,10 @@ float euclid_dist_2(int    numdims,  /* no. dimensions */
 {
     int i;
     float ans=0.0;
-
+    
+    #ifdef PAR
+    #pragma unroll
+    #endif
     for (i=0; i<numdims; i++)
         ans += (coord1[i]-coord2[i]) * (coord1[i]-coord2[i]);
 
@@ -54,13 +57,15 @@ int find_nearest_cluster(int     numClusters, /* no. clusters */
     int   index, i;
     float dist, min_dist;
 
-    #ifdef PARDEB
-    fprintf(stderr, "This is threadID : %d\n", omp_get_thread_num());
-    #endif
+
     /* find the cluster id that has min distance to object */
     index    = 0;
     min_dist = euclid_dist_2(numCoords, object, clusters[0]);
-
+    
+   #ifdef PAR
+   #pragma unroll
+   #endif
+ 
     for (i=1; i<numClusters; i++) {
         dist = euclid_dist_2(numCoords, object, clusters[i]);
         /* no need square root */
@@ -69,6 +74,7 @@ int find_nearest_cluster(int     numClusters, /* no. clusters */
             index    = i;
         }
     }
+  
     return(index);
 }
 
@@ -110,7 +116,11 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
         #endif
         {
         #ifdef PAR
-        #pragma omp for private(index, j), schedule(static)
+        #pragma omp for private(index, j) , schedule(static)
+        #endif
+            
+        #ifdef PAR
+        #pragma unroll
         #endif
         for (i=0; i<numObjs; i++) {
             /* find the array index of nestest cluster center */
@@ -133,13 +143,24 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
             βγουν σωστά αποτελέσματα, αλλιώς τα βγάζουμε τελείως γιατί μου γκρινιάζει το vtune */
             #endif
             newClusterSize[index]++;
-
+            
+            #ifdef PAR
+            #pragma omp critical
+            #endif
+            {
             for (j=0; j<numCoords; j++)
                 newClusters[index][j] += objects[i][j];
+            }
         }
+        
         #ifdef PAR
         #pragma omp for private(j), schedule(static)
         #endif
+          
+        #ifdef PAR
+        #pragma unroll
+        #endif
+ 
         /* average the sum and replace old cluster center with newClusters */
         for (i=0; i<numClusters; i++) {
             for (j=0; j<numCoords; j++) {
@@ -149,10 +170,13 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
             }
             newClusterSize[i] = 0;   /* set back to 0 */
         }
+        
         #ifdef PAR
-        #pragma omp atomic  /* Δοκίμασε και χωρίς αυτό, να συγκρίνεις τα output αρχεία */
+        #pragma omp single nowait  /* Δοκίμασε και χωρίς αυτό, να συγκρίνεις τα output αρχεία */
         #endif
+        {
         delta /= numObjs;
+        }
         }
     } while (delta > threshold && loop++ < 500);
 

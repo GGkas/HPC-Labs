@@ -20,7 +20,8 @@ all: seq
 CC             = icc
 
 INCFLAGS    = -I.
-DEFFLAGS	= -DPAR # DSEQ for sequential, DPAR for parallel
+# DPAR for sequential, DPAR for parallel
+DEFFLAGS    = -DPAR
 OPTFLAGS    = -g -O3 -DNDEBUG -qopenmp $(DEFFLAGS)
 LDFLAGS     = $(OPTFLAGS)
 
@@ -78,10 +79,11 @@ clean:
 		*.cluster_centres *.membership \
 		*.cluster_centres.nc *.membership.nc \
 		Image_data/*.cluster_centres Image_data/*.membership \
-		Image_data/*.cluster_centres.nc Image_data/*.membership.nc
+		Image_data/*.cluster_centres.nc Image_data/*.membership.nc \
+		*.txt
 
 check: all
 	# sequential K-means ---------------------------------------------------
-	./seq_main -q -b -n 4 -i Image_data/color17695.bin
-	./seq_main -q    -n 4 -i Image_data/color100.txt
+	./seq_main -q -o -b -n 4 -i Image_data/color17695.bin
+	./seq_main -q -o  -n 4 -i Image_data/color100.txt
 
