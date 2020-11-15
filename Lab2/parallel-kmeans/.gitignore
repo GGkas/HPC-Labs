@@ -54,3 +54,5 @@ dkms.conf
 # Miscellaneous
 *.pdf
 *.tar.gz
+.vscode/
+.ipynb_checkpoints/
