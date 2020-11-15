@@ -110,16 +110,14 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
         newClusters[i] = newClusters[i-1] + numCoords;
 
     do {
-        delta = 0.0;
         #ifdef PAR
         #pragma omp parallel
         #endif
         {
+        delta = 0.0;
+        
         #ifdef PAR
-        #pragma omp for private(index, j) , schedule(static)
-        #endif
-            
-        #ifdef PAR
+        #pragma omp for private(index, j) , schedule(guided)
         #pragma unroll
         #endif
         for (i=0; i<numObjs; i++) {
@@ -139,8 +137,7 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
 
             /* update new cluster center : sum of objects located within */
             #ifdef PAR
-            #pragma omp atomic /* Μπορεί ούτε αυτό να χρειάζεται, γενικά τσέκαρε αν τα atomic χρειάζονται για να 
-            βγουν σωστά αποτελέσματα, αλλιώς τα βγάζουμε τελείως γιατί μου γκρινιάζει το vtune */
+            #pragma omp atomic
             #endif
             newClusterSize[index]++;
             
@@ -154,13 +151,9 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
         }
         
         #ifdef PAR
-        #pragma omp for private(j), schedule(static)
-        #endif
-          
-        #ifdef PAR
+        #pragma omp for private(j), schedule(guided)
         #pragma unroll
         #endif
- 
         /* average the sum and replace old cluster center with newClusters */
         for (i=0; i<numClusters; i++) {
             for (j=0; j<numCoords; j++) {
@@ -172,13 +165,14 @@ int seq_kmeans(float **objects,      /* in: [numObjs][numCoords] */
         }
         
         #ifdef PAR
-        #pragma omp single nowait  /* Δοκίμασε και χωρίς αυτό, να συγκρίνεις τα output αρχεία */
+        #pragma omp single nowait
         #endif
         {
         delta /= numObjs;
         }
         }
     } while (delta > threshold && loop++ < 500);
+
 
     free(newClusters[0]);
     free(newClusters);

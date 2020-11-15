@@ -17,13 +17,14 @@ fi
 
 make all
 
-while getopts 'e:t:n:c:sp' OPTION; do
+while getopts 'e:t:n:c:sp-:h' OPTION; do
 	case "$OPTION" in
 		t)
 			THRESHOLD=${OPTARG}
 			;;
 		n)
 			# How many system threads to use
+			NUM_THREADS=${OPTARG}
 			export OMP_NUM_THREADS=${OPTARG}
 			;;
 		c)
@@ -39,15 +40,23 @@ while getopts 'e:t:n:c:sp' OPTION; do
 			sed -i -e '/DPAR/s/DPAR/DSEQ/' Makefile
 			make clean
 			make all
+			IS_PAR=0
 			;;
 		p)
 			# Compile with parallel code
 			sed -i -e '/DSEQ/s/DSEQ/DPAR/' Makefile
 			make clean
 			make all
+			IS_PAR=1
 			;;
-		?)
-			echo "Usage: $(basename $0) [-e <execution_times>] [-t <threshold>] [-n <num_threads>] [-c <num_clusters>] [-s/p]"
+		-)
+			if (("${OPTARG}" == "split")); then
+				split -d -l 110 times.txt log
+				exit 0
+			fi
+			;;
+		h)
+			echo "Usage: $(basename $0) [-e <execution_times>] [-t <threshold>] [-n <num_threads>] [-c <num_clusters>] [-s/p] [--split]"
 			exit 1
 			;;
 	esac
@@ -56,11 +65,11 @@ shift "$(($OPTIND -1))"
 
 for (( k = 1; k <= 10; k++))
 do
-	printf "\nConfig: %d clusters\n\n" "$NUM_CLUSTERS"
+	
 	for (( i = 1; i <= $EPOCHS; i++ ))
 	do
-		echo "Running program..."
-		bash -c "${EXEC_DIR}/seq_main -q -o -b -n ${NUM_CLUSTERS} -i ${IMAGE_DIR}texture17695.bin >> execution_logs.data"
+		echo "Running program (clusters = $NUM_CLUSTERS)..."
+		${EXEC_DIR}/seq_main -q -o -b -n ${NUM_CLUSTERS} -i ${IMAGE_DIR}texture17695.bin >> execution_logs.data
 	done
 
 	COMP_TIMES=`cat execution_logs.data | grep "Computation" | awk -F'=' '{print $2}'`
