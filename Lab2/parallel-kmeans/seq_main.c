@@ -26,6 +26,10 @@
 #include <fcntl.h>
 #include <unistd.h>     /* getopt() */
 
+#ifdef PAR
+#include <omp.h>
+#endif
+
 int      _debug;
 #include "kmeans.h"
 
@@ -41,7 +45,8 @@ static void usage(char *argv0, float threshold) {
         "       -o             : output timing results (default no)\n"
         "       -q             : quiet mode\n"
         "       -d             : enable debug mode\n"
-        "       -h             : print this help information\n";
+        "       -h             : print this help information\n"
+	"       -p nproc       : number of threads (default: system allocated). Only available in parallel mode\n";
     fprintf(stderr, help, argv0, threshold);
     exit(-1);
 }
@@ -60,6 +65,7 @@ int main(int argc, char **argv) {
            float **clusters;      /* [numClusters][numCoords] cluster center */
            float   threshold;
            double  timing, io_timing, clustering_timing;
+	   char command_str[100] = "export OMP_NUM_THREADS=";
 
     /* some default values */
     _debug           = 0;
@@ -89,13 +95,17 @@ int main(int argc, char **argv) {
                       break;
             case 'd': _debug = 1;
                       break;
+	    #ifdef PAR
+	    case 'p': omp_set_num_threads(atoi(optarg));
+		      break;
+	    #endif
             case 'h':
             default: usage(argv[0], threshold);
                       break;
         }
     }
     if (center_filename == NULL)
-        center_filename = filename;
+	center_filename = filename;
 
     if (filename == 0 || numClusters <= 1) usage(argv[0], threshold);
 

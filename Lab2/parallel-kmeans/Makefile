@@ -14,14 +14,14 @@
 
 .KEEP_STATE:
 
-all: seq 
+all: seq
 
 
 CC             = icc
 
 INCFLAGS    = -I.
 # DPAR for sequential, DPAR for parallel
-DEFFLAGS    = -DPAR
+DEFFLAGS    = -DSEQ
 OPTFLAGS    = -g -O3 -DNDEBUG -qopenmp $(DEFFLAGS)
 LDFLAGS     = $(OPTFLAGS)
 
